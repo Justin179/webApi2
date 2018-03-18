@@ -12,6 +12,7 @@ using WebApiDemo.Models;
 
 namespace WebApiDemo.Controllers
 {
+    [RoutePrefix("products")]
     public class ProductsController : ApiController
     {
         private FabricsEntities db = new FabricsEntities();
@@ -22,12 +23,23 @@ namespace WebApiDemo.Controllers
         }
 
         // GET: api/Products
+        /// <summary>
+        /// 取得全部商品
+        /// </summary>
+        /// <returns></returns>
+        [Route("")]
         public IQueryable<Product> GetProduct()
         {
             return db.Product.OrderByDescending(p=>p.ProductId).Take(10);
         }
 
         // GET: api/Products/5
+        /// <summary>
+        /// 取得單一商品
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Route("{id}", Name = "GetProductById")]
         [ResponseType(typeof(Product))]
         public IHttpActionResult GetProduct(int id)
         {
@@ -40,7 +52,21 @@ namespace WebApiDemo.Controllers
             return Ok(product);
         }
 
+        [Route("{id:int}/orderlines")]
+        [ResponseType(typeof(Product))]
+        public IHttpActionResult GetProductOrderLines(int id)
+        {
+            Product product = db.Product.Include("OrderLine").FirstOrDefault(p => p.ProductId == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product.OrderLine.ToList());
+        }
+
         // PUT: api/Products/5
+        [Route("{id}")]
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProduct(int id, Product product)
         {
@@ -76,6 +102,7 @@ namespace WebApiDemo.Controllers
         }
 
         // POST: api/Products
+        [Route("")]
         [ResponseType(typeof(Product))]
         public IHttpActionResult PostProduct(Product product)
         {
@@ -91,6 +118,7 @@ namespace WebApiDemo.Controllers
         }
 
         // DELETE: api/Products/5
+        [Route("")]
         [ResponseType(typeof(Product))]
         public IHttpActionResult DeleteProduct(int id)
         {
